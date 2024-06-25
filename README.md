@@ -1,2 +1,6 @@
 # ugo-git
-Implement Git in Golang
+
+uGo-Git is a small implementation of a Git-like version control version (VCS) to studies Git and Golang.
+
+
+
