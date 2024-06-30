@@ -37,8 +37,27 @@ func parseArgs() {
 		},
 	}
 
+	catFileCmd := &cobra.Command{
+		Use:   "cat-file",
+		Short: "It can print an object by its OID.",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			optCatFile(args[0])
+		},
+	}
+
+	writeTree := &cobra.Command{
+		Use:   "write-tree",
+		Short: "The write-tree is for storing a whole directory.",
+		Run: func(cmd *cobra.Command, args []string) {
+			optWriteTree()
+		},
+	}
+
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(hashCmd)
+	rootCmd.AddCommand(catFileCmd)
+	rootCmd.AddCommand(writeTree)
 
 	err := rootCmd.Execute()
 	if err != nil {
@@ -46,6 +65,7 @@ func parseArgs() {
 	}
 }
 
+// Initialize a new git repository
 func optInit() {
 
 	res, err := data.Data_init()
@@ -57,6 +77,7 @@ func optInit() {
 
 }
 
+// Hash the content of the file using SHA-1.
 func optHashObj(fl string) {
 
 	f, err := os.Open(fl)
@@ -70,11 +91,35 @@ func optHashObj(fl string) {
 		log.Fatalln(err)
 	}
 
-	res, err := data.HashObject(fb)
+	res, err := data.HashObject(fb, "blob")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	data.SaveHashObj(fb, res)
+	obj := append([]byte("blob\x00"), fb...)
+	err = data.SaveHashObj(obj, res)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Println(res)
+
+}
+
+// It can print an object by its OID.
+func optCatFile(fl string) {
+
+	res, err := data.GetObject(fl, "blob")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Println(res)
+
+}
+
+func optWriteTree() {
+
+	data.WriteTree(".")
 
 }
