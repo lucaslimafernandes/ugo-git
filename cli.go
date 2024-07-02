@@ -54,10 +54,19 @@ func parseArgs() {
 		},
 	}
 
+	readTree := &cobra.Command{
+		Use:   "read-tree",
+		Short: "This command will take an OID of a tree and extract it to the working directory.",
+		Run: func(cmd *cobra.Command, args []string) {
+			optReadTree(args[0])
+		},
+	}
+
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(hashCmd)
 	rootCmd.AddCommand(catFileCmd)
 	rootCmd.AddCommand(writeTree)
+	rootCmd.AddCommand(readTree)
 
 	err := rootCmd.Execute()
 	if err != nil {
@@ -120,6 +129,17 @@ func optCatFile(fl string) {
 
 func optWriteTree() {
 
-	data.WriteTree(".")
+	res, err := data.WriteTree(".")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Println(res)
+
+}
+
+func optReadTree(read string) {
+
+	data.ReadTree(read)
 
 }
