@@ -127,6 +127,7 @@ func optCatFile(fl string) {
 
 }
 
+// Where we turn a collection of separate files into a single object that represents a directory.
 func optWriteTree() {
 
 	res, err := data.WriteTree(".")
@@ -138,6 +139,7 @@ func optWriteTree() {
 
 }
 
+// This command will take an OID of a tree and extract it to the working directory.
 func optReadTree(read string) {
 
 	data.ReadTree(read)

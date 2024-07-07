@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -129,6 +130,8 @@ func getTree(oid string, basePath string) map[string]string {
 
 func ReadTree(treeOid string) {
 
+	emptyCurrentDirectory()
+
 	for path, oid := range getTree(treeOid, "./") {
 
 		os.MkdirAll(filepath.Dir(path), os.ModePerm)
@@ -139,4 +142,54 @@ func ReadTree(treeOid string) {
 			fmt.Printf("Error writing file %s: %v\n", path, err)
 		}
 	}
+}
+
+func emptyCurrentDirectory() {
+
+	err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
+
+		if err != nil {
+			return err
+		}
+
+		// Ignore root
+		if path == "." {
+			return nil
+		}
+
+		// Relative path
+		relPath, err := filepath.Rel(".", path)
+		if err != nil {
+			return err
+		}
+
+		if isIgnored(relPath) {
+			return nil
+		}
+
+		if info.IsDir() {
+			// Remove dir
+			err := os.Remove(relPath)
+			if err != nil {
+				// Ignore (not empty dir)
+				return nil
+			}
+		} else {
+
+			if info.Mode().IsRegular() {
+				err := os.Remove(relPath)
+				if err != nil {
+					return err
+				}
+			}
+
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		log.Println("Error to cleaning dir:", err)
+	}
+
 }
